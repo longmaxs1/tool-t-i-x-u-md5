@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Tài/Xỉu MD5 Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Orbitron', sans-serif;
+        background: radial-gradient(circle at center, #111 0%, #000 100%);
+        color: white;
+        text-align: center;
+        padding: 20px;
+    }
+    h1 {
+        color: gold;
+        text-shadow: 0 0 10px gold;
+        font-size: 32px;
+    }
+    .dice {
+        font-size: 40px;
+        margin-right: 10px;
+    }
+    input, button {
+        padding: 10px;
+        margin: 8px;
+        width: 80%;
+        font-size: 16px;
+        border-radius: 5px;
+        border: none;
+    }
+    input {
+        background: #222;
+        color: white;
+        border: 1px solid #555;
+    }
+    button {
+        background: gold;
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    button:hover {
+        background: #ffcc00;
+        box-shadow: 0 0 10px gold;
+    }
+    .result {
+        margin-top: 20px;
+        font-size: 24px;
+        padding: 15px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 10px;
+        display: inline-block;
+        min-width: 200px;
+    }
+    .tai {
+        color: lime;
+        font-size: 40px;
+    }
+    .xiu {
+        color: red;
+        font-size: 40px;
+    }
+</style>
+</head>
+<body>
+
+<h1><span class="dice">🎲</span>Tài/Xỉu MD5 Checker</h1>
+
+<input type="text" id="md5Public" placeholder="Nhập MD5 công bố trước ván">
+<input type="text" id="originalData" placeholder="Nhập chuỗi gốc (sau khi công bố)">
+<button onclick="checkMD5()">Kiểm tra</button>
+
+<div class="result" id="output"></div>
+
+<audio id="jackpotSound" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" preload="auto"></audio>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+function md5(str) {
+    return CryptoJS.MD5(str).toString();
+}
+
+function taiXiuFromMD5(md5Str) {
+    let last3 = md5Str.slice(-3);
+    let num = parseInt(last3, 16);
+    let diem = num % 100;
+    return diem >= 50 ? "TÀI" : "XỈU";
+}
+
+function animateNumber(target, callback) {
+    let current = 0;
+    let step = Math.ceil(target / 30);
+    let interval = setInterval(() => {
+        current += step;
+        if (current >= target) {
+            current = target;
+            clearInterval(interval);
+            callback();
+        }
+        document.getElementById("output").innerHTML = `<div style="font-size:30px;color:cyan">Đang tính: ${current}</div>`;
+    }, 30);
+}
+
+function checkMD5() {
+    let md5Public = document.getElementById("md5Public").value.trim();
+    let originalData = document.getElementById("originalData").value.trim();
+
+    if (!md5Public || !originalData) {
+        alert("Vui lòng nhập đầy đủ thông tin!");
+        return;
+    }
+
+    let md5Calculated = md5(originalData);
+    let match = (md5Calculated === md5Public);
+    let jackpotSound = document.getElementById("jackpotSound");
+
+    animateNumber(99, () => {
+        let ketqua = taiXiuFromMD5(md5Calculated);
+        let colorClass = ketqua === "TÀI" ? "tai" : "xiu";
+        jackpotSound.play();
+        document.getElementById("output").innerHTML =
+            `<div>MD5 tính được:<br>${md5Calculated}</div>` +
+            `<div>${match ? "✅ Khớp MD5" : "❌ Không khớp MD5"}</div>` +
+            `<div class="${colorClass}">${ketqua}</div>`;
+    });
+}
+</script>
+
+</body>
+</html>
